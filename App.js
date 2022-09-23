@@ -1,21 +1,39 @@
-import { StatusBar } from 'expo-status-bar';
-import React from 'react';
+import * as React from 'react';
+import { Avatar, Button, Card, Title, Paragraph } from 'react-native-paper';
 import { StyleSheet, Text, View } from 'react-native';
+import AudioRecorderPlayer, { 
+  AVEncoderAudioQualityIOSType,
+  AVEncodingOption, 
+  AudioEncoderAndroidType,
+  AudioSet,
+  AudioSourceAndroidType, 
+ } from 'react-native-audio-recorder-player';
 
-export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Used tutorial: https://www.developers-zone.com/best-way-to-create-react-native-app-in-visual-studio-code/</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
+
+class Application extends React.Component {
+    constructor(props) {
+      super(props);
+      this.state = {
+        isLoggingIn: false,
+        recordSecs: 0,
+        recordTime: '00:00:00',
+        currentPositionSec: 0,
+        currentDurationSec: 0,
+        playTime: '00:00:00',
+        duration: '00:00:00',
+      };
+      this.audioRecorderPlayer = new AudioRecorderPlayer();
+      this.audioRecorderPlayer.setSubscriptionDuration(0.09);
+    }
+
+    render() {
+      return (
+        <Card>
+        <Card.Title title="Sprachsynthese"/>
+        </Card>
+      );
+    }
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+
+export default Application;
