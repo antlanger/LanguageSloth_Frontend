@@ -46,9 +46,7 @@ export default function App() {
       duration: getDurationFormatted(status.durationMillis),
       file: recording.getURI()
     });
-
-    console.log({recording})
-
+    
     setRecordings(updatedRecordings);
   }
 
