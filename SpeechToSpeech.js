@@ -1,11 +1,11 @@
 /* -------------------------------------------------------------------------- */
 /*                                   Imports                                  */
 /* -------------------------------------------------------------------------- */
-import * as React from 'react';
+import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Button, Pressable } from 'react-native';
+import { StyleSheet, Text, View, Pressable } from 'react-native';
 import { Audio } from 'expo-av';
-import * as Sharing from 'expo-sharing';
+import {Dropdown} from 'react-native-element-dropdown';
 
 
 /* -------------------------------------------------------------------------- */
@@ -14,8 +14,9 @@ import * as Sharing from 'expo-sharing';
 export default function SpeechToSpeech() { 
   const [recording, setRecording] = React.useState();
   const [recordings, setRecordings] = React.useState([]);
-  const [message, setMessage] = React.useState(""); 
+  const [message, setMessage] = React.useState("");
   
+  /* -------------------------------- Recording ------------------------------- */
   async function startRecording() {
     try {
       const permission = await Audio.requestPermissionsAsync();
@@ -75,10 +76,45 @@ export default function SpeechToSpeech() {
     });
   }
 
+  /* -------------------------------- Dropdown -------------------------------- */
+  const dropdownData = [
+    { label: 'English', value: '1'},
+    { label: 'German', value: '2'},
+    { label: 'Spanish', value: '3'},
+    { label: 'Italian', value: '4'},
+    { label: 'French', value: '5'}
+  ];
+
+  const [value, setValue] = useState(null);
+  const [isFocus, setIsFocus] = useState(false);
+
   //<Button style={styles.button} onPress={() => Sharing.shareAsync(recordingLine.file)} title="Share"></Button>
     
   return (
     <View style={styles.container}>
+      <Dropdown
+          style={[styles.dropdown, isFocus && { borderColor: 'blue' }]}
+          placeholderStyle={styles.placeholderStyle}
+          selectedTextStyle={styles.selectedTextStyle}
+          inputSearchStyle={styles.inputSearchStyle}
+          iconStyle={styles.iconStyle}
+          data={dropdownData}
+          search
+          maxHeight={300}
+          labelField="label"
+          valueField="value"
+          placeholder={!isFocus ? 'Select item' : '...'}
+          searchPlaceholder="Search..."
+          value={value}
+          onFocus={() => setIsFocus(true)}
+          onBlur={() => setIsFocus(false)}
+          onChange={item => {
+            setValue(item.value);
+            setIsFocus(false);
+          }}
+        />
+
+
       <Text>{message}</Text>
         <Pressable
         onPress={recording ? stopRecording : startRecording}
@@ -126,5 +162,31 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     letterSpacing: 0.25,
     color: 'white',
-  }
+  },
+  dropdown: {
+    height: 50,
+    borderColor: 'gray',
+    borderWidth: 0.5,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+  },
+  placeholderStyle: {
+    fontSize: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 20,
+    paddingHorizontal: 35
+  },
+  selectedTextStyle: {
+    fontSize: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 20,
+    width: 150,
+    textAlign: 'center'
+  },
+  inputSearchStyle: {
+    height: 40,
+    fontSize: 16,
+  },
 });
