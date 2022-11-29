@@ -69,7 +69,7 @@ export default function SpeechToSpeech() {
         <View key={index} style={styles.row}>
           <Text style={styles.fill}>Recording {index + 1}</Text>
           <Pressable style={styles.button} onPress={() => recordingLine.sound.replayAsync()}>
-            <Text style={styles.text}>Play</Text>
+            <Text style={styles.text}>PLAY</Text>
           </Pressable>
         </View>
       );
@@ -103,7 +103,7 @@ export default function SpeechToSpeech() {
           maxHeight={300}
           labelField="label"
           valueField="value"
-          placeholder={!isFocus ? 'Select item' : '...'}
+          placeholder={!isFocus ? 'Select language' : '...'}
           searchPlaceholder="Search..."
           value={value}
           onFocus={() => setIsFocus(true)}
@@ -119,7 +119,7 @@ export default function SpeechToSpeech() {
         <Pressable
         onPress={recording ? stopRecording : startRecording}
         style={styles.button}> 
-            <Text style={styles.text}>{recording ? 'Stop Recording' : 'Start Recording'}</Text>
+            <Text style={styles.text}>{recording ? 'STOP RECORDING' : 'START RECORDING'}</Text>
         </Pressable>
       {getRecordingLines()}
       <StatusBar style="auto" />
@@ -169,6 +169,7 @@ const styles = StyleSheet.create({
     borderWidth: 0.5,
     borderRadius: 8,
     paddingHorizontal: 8,
+    margin: 10
   },
   placeholderStyle: {
     fontSize: 16,
@@ -182,8 +183,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 20,
-    width: 150,
-    textAlign: 'center'
+    width: 185,
+    textAlign: 'center',
   },
   inputSearchStyle: {
     height: 40,

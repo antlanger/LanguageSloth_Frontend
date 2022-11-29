@@ -26,7 +26,7 @@ export default function App() {
           tabBarInactiveTintColor: 'gray',
         })}>
         <Tab.Screen name="Speech-To-Speech" component={SpeechToSpeech} />
-        <Tab.Screen name="Text-To-Speech" component={TextToSpeech} />
+        <Tab.Screen name="Text-To-Text" component={TextToSpeech} />
       </Tab.Navigator>
     </NavigationContainer>
   );
