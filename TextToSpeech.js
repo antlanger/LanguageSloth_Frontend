@@ -19,29 +19,52 @@ const MultilineTextInput = (props) => {
   );
 }
 
+var translatedText = null;
+
+function handleClick(textValue){
+
+  if (textValue == null)
+  {
+    return;
+  }
+
+  translatedText = fetch('http://localhost:8080/libretranslate?text=' + textValue, {
+    method: 'GET',
+    mode: 'no-cors',
+  }).then(response => {
+    return response.text;
+  }).then(data => {
+    console.log(data);
+  })
+
+  //console.log(translatedText);
+}
+
 export default function TextToSpeech() {  
   
 /* -------------------------------- Textinput ------------------------------- */
 const [value, onChangeText] = useState('Enter text here...');
+
+
   
   return (
     <View style={styles.container}>
       <MultilineTextInput
         multiline
         numberOfLines={4}
-        onChangeText={text => onChangeText(text)}
-        value={value}
+        onChangeText={(text) => onChangeText(text)}
+        value={value || ""}
         style={styles.input}
       />
 
-      <Pressable style={styles.button}>
+      <Pressable style={styles.button} onPress={() => handleClick(value)}>
       <Text style={styles.text}>TRANSLATE</Text>
       </Pressable> 
 
       <MultilineTextInput
         multiline
         numberOfLines={4}
-        value='Output'
+        value={translatedText || ""}
         style={styles.input}
       /> 
 
