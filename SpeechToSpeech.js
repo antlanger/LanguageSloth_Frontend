@@ -4,8 +4,10 @@
 import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, Pressable } from 'react-native';
-import { Audio } from 'expo-av';
 import {Dropdown} from 'react-native-element-dropdown';
+
+let mediaRecorder;
+let chunks = [];
 
 
 /* -------------------------------------------------------------------------- */
@@ -16,9 +18,10 @@ export default function SpeechToSpeech() {
   const [recordings, setRecordings] = React.useState([]);
   const [message, setMessage] = React.useState("");
   
+
   /* -------------------------------- Recording ------------------------------- */
   async function startRecording() {
-    try {
+    /*try {
       const permission = await Audio.requestPermissionsAsync();
 
       if (permission.status === "granted") {
@@ -37,11 +40,82 @@ export default function SpeechToSpeech() {
       }
     } catch (err) {
       console.error('Failed to start recording', err);
+    }*/
+
+    if (navigator.mediaDevices.getUserMedia)
+    {
+      console.log('SpeechToSpeech: getUserMedia supported.');
+      const constraints = {audio: true};
+
+      navigator.mediaDevices
+        .getUserMedia(constraints)
+        .then((stream) => {
+          mediaRecorder = new MediaRecorder(stream);
+
+          mediaRecorder.ondataavailable = (e) => {
+            console.log(e.data)
+            chunks.push(e.data);
+          };
+          
+          mediaRecorder.start();
+
+          mediaRecorder.onstop = (e) => {
+            console.log('Creating BLOB and sending to server...');
+            const audioBlob = new Blob(chunks, { type: "audio/webm"});
+            const audioUrl = URL.createObjectURL(audioBlob);
+            console.log(audioBlob.size)
+            console.log(audioBlob)
+            console.log(chunks)
+            //const audio = new Audio(audioUrl);
+            //audio.play();
+            
+            console.log('Clearing chunks...');
+            chunks = [];
+
+            const formData = new FormData();
+            formData.append('file', audioBlob);
+
+            for (var key of formData.entries()){
+              console.log(key[0] + ',' + key[1]);
+            }
+
+            const options = {
+              method: 'POST',
+              body: formData
+            }
+
+            fetch('http://localhost:8080/convertInputToWav', options)
+            .then(response => response.json())
+            .then(data => {
+              console.log(data);
+            })
+            .catch(error => {
+              console.error(error);
+            });
+          }
+
+          console.log(mediaRecorder.state);
+          console.log("recorder started");
+        })
+
     }
+
+    /*navigator.mediaDevices.getUserMedia({ audio: true })
+    .then(stream => {
+      audioChunks = [];
+      mediaRecorder = new MediaRecorder(stream);
+
+      mediaRecorder.addEventListener('dataavailable', event => {
+        audioChunks.push(event.data);
+      });
+
+      mediaRecorder.start();
+    });*/
+    setRecording(true);
   }
 
   async function stopRecording() {
-    setRecording(undefined);
+    /*setRecording(undefined);
     await recording.stopAndUnloadAsync();
 
     let updatedRecordings = [...recordings];
@@ -51,11 +125,39 @@ export default function SpeechToSpeech() {
       duration: getDurationFormatted(status.durationMillis),
       file: recording.getURI()
     });
+
+    console.log(sound);
     
+    //const file = new File([], 'test.webm');
+    const formData = new FormData();
+    formData.append('fileName', sound);
+    const options = {
+      method: 'POST',
+      body: formData
+    }
+
+    fetch('http://localhost:8080/convertInputToWav', options)
+    .then(response => response.json())
+    .then(data => {
+      console.log(data);
+    })
+    .catch(error => {
+      console.error(error);
+    });
+
+    //console.log(file)
+
     setRecordings(updatedRecordings);
+    */
+    
+
+    
+    mediaRecorder.stop();
+    console.log("recorder stopped");    
+    setRecording(false);
   }
 
-  function getDurationFormatted(millis) {
+  /*function getDurationFormatted(millis) {
     const minutes = millis / 1000 / 60;
     const minutesDisplay = Math.floor(minutes);
     const seconds = Math.round((minutes - minutesDisplay) * 60);
@@ -74,7 +176,7 @@ export default function SpeechToSpeech() {
         </View>
       );
     });
-  }
+  }*/
 
   /* -------------------------------- Dropdown -------------------------------- */
   const dropdownData = [
@@ -121,7 +223,6 @@ export default function SpeechToSpeech() {
         style={styles.button}> 
             <Text style={styles.text}>{recording ? 'STOP RECORDING' : 'START RECORDING'}</Text>
         </Pressable>
-      {getRecordingLines()}
       <StatusBar style="auto" />
     </View>
   );
