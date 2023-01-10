@@ -3,7 +3,7 @@
 /* -------------------------------------------------------------------------- */
 import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, TextInput, Pressable } from 'react-native';
+import { StyleSheet, Text, View, TextInput, Pressable, Image } from 'react-native';
 import {Dropdown} from 'react-native-element-dropdown';
 
 /* -------------------------------------------------------------------------- */
@@ -69,6 +69,8 @@ const [isFocusSource, setIsFocusSource] = useState(false);
 const [isFocusTarget, setIsFocusTarget] = useState(false);
   
   return (
+    <View style={styles.background}>
+    <Image style={styles.backgroundImage} source={require('./images/LanguageSloth_Background.png')}/>
     <View style={styles.container}>
         <Dropdown
           style={[styles.dropdown, isFocusSource && { borderColor: 'blue' }]}
@@ -134,6 +136,7 @@ const [isFocusTarget, setIsFocusTarget] = useState(false);
       /> 
 
     </View>
+    </View>
   );
 }
 
@@ -145,9 +148,9 @@ const [isFocusTarget, setIsFocusTarget] = useState(false);
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
+    zIndex: 2,
   },
   input: {
     height: 100,
@@ -156,6 +159,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 4,
     minWidth: 390,
+    backgroundColor: '#fff'
   },
   button: {
     alignItems: 'center',
@@ -179,7 +183,8 @@ const styles = StyleSheet.create({
     borderWidth: 0.5,
     borderRadius: 8,
     paddingHorizontal: 8,
-    margin: 10
+    margin: 10,
+    backgroundColor: '#fff'
   },
   placeholderStyle: {
     fontSize: 16,
@@ -200,4 +205,17 @@ const styles = StyleSheet.create({
     height: 40,
     fontSize: 16,
   },
+  backgroundImage: {
+    width: 400,
+    height: 400,
+    position: 'absolute',
+    right: -25,
+    top: -25,
+    zIndex: 1
+  },
+  background: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#fff',
+  }
 });

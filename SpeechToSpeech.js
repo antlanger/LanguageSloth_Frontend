@@ -3,7 +3,7 @@
 /* -------------------------------------------------------------------------- */
 import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Pressable } from 'react-native';
+import { StyleSheet, Text, View, Pressable, Image, ImageBackground} from 'react-native';
 import {Dropdown} from 'react-native-element-dropdown';
 
 let mediaRecorder;
@@ -15,33 +15,14 @@ let chunks = [];
 /* -------------------------------------------------------------------------- */
 export default function SpeechToSpeech() { 
   const [recording, setRecording] = React.useState();
-  const [recordings, setRecordings] = React.useState([]);
+  const [play, setPlayButton] = React.useState();
+  //const [recordings, setRecordings] = React.useState([]);
   const [message, setMessage] = React.useState("");
+  const [audioUrl, setAudioUrl] = React.useState("");
   
 
   /* -------------------------------- Recording ------------------------------- */
   async function startRecording() {
-    /*try {
-      const permission = await Audio.requestPermissionsAsync();
-
-      if (permission.status === "granted") {
-        await Audio.setAudioModeAsync({
-          allowsRecordingIOS: true,
-          playsInSilentModeIOS: true
-        });
-        
-        const { recording } = await Audio.Recording.createAsync(
-          Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
-        );
-
-        setRecording(recording);
-      } else {
-        setMessage("Please grant permission to app to access microphone");
-      }
-    } catch (err) {
-      console.error('Failed to start recording', err);
-    }*/
-
     if (navigator.mediaDevices.getUserMedia)
     {
       console.log('SpeechToSpeech: getUserMedia supported.');
@@ -60,18 +41,16 @@ export default function SpeechToSpeech() {
           mediaRecorder.start();
 
           mediaRecorder.onstop = (e) => {
-            console.log('Creating BLOB and sending to server...');
+            console.log('Creating BLOB...');
             const audioBlob = new Blob(chunks, { type: "audio/webm"});
-            const audioUrl = URL.createObjectURL(audioBlob);
-            console.log(audioBlob.size)
-            console.log(audioBlob)
-            console.log(chunks)
+            setAudioUrl(URL.createObjectURL(audioBlob));
             //const audio = new Audio(audioUrl);
             //audio.play();
             
             console.log('Clearing chunks...');
             chunks = [];
 
+            console.log('Attaching BLOB to FormData...');
             const formData = new FormData();
             formData.append('file', audioBlob);
 
@@ -79,104 +58,96 @@ export default function SpeechToSpeech() {
               console.log(key[0] + ',' + key[1]);
             }
 
+            console.log('Sending BLOB to server for further processing...');
             const options = {
               method: 'POST',
               body: formData
             }
 
             fetch('http://localhost:8080/convertInputToWav', options)
-            .then(response => response.json())
+            .then(resp => resp.blob())
             .then(data => {
-              console.log(data);
+              console.log('Return data ' + data);
+              //var binaryData = [];
+              //binaryData.push(data.body);
+              //var data_blob = new Blob(data, {type: "audio/wav"})
+              setAudioUrl(URL.createObjectURL(data));
             })
             .catch(error => {
               console.error(error);
             });
           }
 
-          console.log(mediaRecorder.state);
-          console.log("recorder started");
+          console.log('MediaRecorder state is ' + mediaRecorder.state);
+          console.log('Recording started...');
         })
 
     }
-
-    /*navigator.mediaDevices.getUserMedia({ audio: true })
-    .then(stream => {
-      audioChunks = [];
-      mediaRecorder = new MediaRecorder(stream);
-
-      mediaRecorder.addEventListener('dataavailable', event => {
-        audioChunks.push(event.data);
-      });
-
-      mediaRecorder.start();
-    });*/
     setRecording(true);
+    setPlayButton(false);
   }
 
   async function stopRecording() {
-    /*setRecording(undefined);
-    await recording.stopAndUnloadAsync();
-
-    let updatedRecordings = [...recordings];
-    const { sound, status } = await recording.createNewLoadedSoundAsync();
-    updatedRecordings.push({
-      sound: sound,
-      duration: getDurationFormatted(status.durationMillis),
-      file: recording.getURI()
-    });
-
-    console.log(sound);
-    
-    //const file = new File([], 'test.webm');
-    const formData = new FormData();
-    formData.append('fileName', sound);
-    const options = {
-      method: 'POST',
-      body: formData
-    }
-
-    fetch('http://localhost:8080/convertInputToWav', options)
-    .then(response => response.json())
-    .then(data => {
-      console.log(data);
-    })
-    .catch(error => {
-      console.error(error);
-    });
-
-    //console.log(file)
-
-    setRecordings(updatedRecordings);
-    */
-    
-
-    
     mediaRecorder.stop();
-    console.log("recorder stopped");    
+    console.log('Recording stopped...');    
     setRecording(false);
+    setPlayButton(true);
   }
 
-  /*function getDurationFormatted(millis) {
-    const minutes = millis / 1000 / 60;
-    const minutesDisplay = Math.floor(minutes);
-    const seconds = Math.round((minutes - minutesDisplay) * 60);
-    const secondsDisplay = seconds < 10 ? `0${seconds}` : seconds;
-    return `${minutesDisplay}:${secondsDisplay}`;
+  function setButtonText() {
+    console.log('Variable - recording - is ' + recording);
+    console.log('Variable - play - is ' + play);
+
+    if (!recording && !play) {
+      console.log('START');
+      return 'START RECORDING';
+    }else if (!recording && play)
+    {
+      console.log('PLAY');
+      return 'PLAY AUDIO';
+    }else if (recording)
+    {
+      console.log('STOP');
+      return 'STOP RECORDING';
+    }
   }
 
-  function getRecordingLines() {
-    return recordings.map((recordingLine, index) => {
+  function workOnAction() {
+
+    if (recording == undefined || play == undefined) {
+      setRecording(false);
+      setPlayButton(false);
+    }
+    
+    if (!recording && !play) {
+      startRecording();
+    }else if (!recording && play)
+    {
+      // Play received audio
+      let audio = new Audio(audioUrl);
+      audio.play();
+    }else if (recording)
+    {
+      stopRecording();
+    }
+  }
+
+  function redoRecording() {
+    setRecording(false);
+    setPlayButton(false);
+  }
+
+  function showDeleteButton() {
+    if (play) {
       return (
-        <View key={index} style={styles.row}>
-          <Text style={styles.fill}>Recording {index + 1}</Text>
-          <Pressable style={styles.button} onPress={() => recordingLine.sound.replayAsync()}>
-            <Text style={styles.text}>PLAY</Text>
+          <Pressable onPress={redoRecording}>
+            <Image style={styles.deleteButton} source={require('./images/LanguageSloth_Redo.svg')}/>
           </Pressable>
-        </View>
       );
-    });
-  }*/
+    } else {
+        return null;
+    }
+  }
 
   /* -------------------------------- Dropdown -------------------------------- */
   const dropdownData = [
@@ -192,8 +163,12 @@ export default function SpeechToSpeech() {
 
   //<Button style={styles.button} onPress={() => Sharing.shareAsync(recordingLine.file)} title="Share"></Button>
     
+  
+
   return (
-    <View style={styles.container}>
+    <View style={styles.background}>
+        <Image style={styles.backgroundImage} source={require('./images/LanguageSloth_Background.png')}/>
+        <View style={styles.container}>
       <Dropdown
           style={[styles.dropdown, isFocus && { borderColor: 'blue' }]}
           placeholderStyle={styles.placeholderStyle}
@@ -218,13 +193,25 @@ export default function SpeechToSpeech() {
 
 
       <Text>{message}</Text>
-        <Pressable
-        onPress={recording ? stopRecording : startRecording}
-        style={styles.button}> 
-            <Text style={styles.text}>{recording ? 'STOP RECORDING' : 'START RECORDING'}</Text>
-        </Pressable>
+        <View style={styles.buttonView}>
+          <Pressable
+          onPress=
+          {
+            workOnAction
+          }
+          style={styles.button}> 
+              <Text style={styles.text}>
+                {
+                  setButtonText()
+                }
+              </Text>
+          </Pressable>
+          {showDeleteButton()}
+        </View>
       <StatusBar style="auto" />
     </View>
+    </View>
+    
   );
 }
 
@@ -235,9 +222,9 @@ export default function SpeechToSpeech() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
+    zIndex: 2,
   },
   row: {
     flexDirection: 'row',
@@ -270,7 +257,8 @@ const styles = StyleSheet.create({
     borderWidth: 0.5,
     borderRadius: 8,
     paddingHorizontal: 8,
-    margin: 10
+    margin: 10,
+    backgroundColor: '#fff'
   },
   placeholderStyle: {
     fontSize: 16,
@@ -291,4 +279,27 @@ const styles = StyleSheet.create({
     height: 40,
     fontSize: 16,
   },
+  deleteButton: {
+    width: 30,
+    height: 30,
+    marginLeft: 10
+  },
+  buttonView: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+  },
+  backgroundImage: {
+    width: 400,
+    height: 400,
+    position: 'absolute',
+    right: -25,
+    top: -25,
+    zIndex: 1
+  },
+  background: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#fff',
+  }
 });
