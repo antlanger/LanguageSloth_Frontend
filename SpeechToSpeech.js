@@ -25,6 +25,7 @@ export default function SpeechToSpeech() {
   //const [recordings, setRecordings] = React.useState([]);
   const [message, setMessage] = React.useState("");
   const [audioUrl, setAudioUrl] = React.useState("");
+  const [validationError, setValidationError] = React.useState("");
 
   /* -------------------------------- Recording ------------------------------- */
   async function startRecording() {
@@ -55,6 +56,10 @@ export default function SpeechToSpeech() {
           console.log("Attaching BLOB to FormData...");
           const formData = new FormData();
           formData.append("file", audioBlob);
+          console.log(inputValue);
+          console.log(targetValue);
+          formData.append("inputLanguage", inputValue);
+          formData.append("targetLanguage", targetValue);
 
           for (var key of formData.entries()) {
             console.log(key[0] + "," + key[1]);
@@ -116,9 +121,14 @@ export default function SpeechToSpeech() {
       setRecording(false);
       setPlayButton(false);
     }
-
     if (!recording && !play) {
-      startRecording();
+      if(inputValue != null && targetValue != null){
+        setValidationError("");
+        startRecording();
+      }
+      else{
+        setValidationError("Please enter input and target language.");
+      }
     } else if (!recording && play) {
       // Play received audio
       let audio = new Audio(audioUrl);
@@ -150,18 +160,18 @@ export default function SpeechToSpeech() {
 
   /* -------------------------------- Dropdown -------------------------------- */
   const dropdownData = [
-    { label: "English", value: "1" },
-    { label: "German", value: "2" },
-    { label: "Spanish", value: "3" },
-    { label: "Italian", value: "4" },
-    { label: "French", value: "5" },
+    { label: "English", value: "en" },
+    { label: "German", value: "de" },
+    { label: "Spanish", value: "es" },
+    { label: "Italian", value: "it" },
+    { label: "French", value: "fr" },
   ];
 
   const [inputValue, setInputValue] = useState(null);
   const [isInputFocus, setIsInputFocus] = useState(false);
 
-  const [outputValue, setOutputValue] = useState(null);
-  const [isOutputFocus, setIsOutputFocus] = useState(false);
+  const [targetValue, setTargetValue] = useState(null);
+  const [isTargetFocus, setIsTargetFocus] = useState(false);
 
 
   /* -------------------------------------------------------------------------- */
@@ -198,7 +208,7 @@ export default function SpeechToSpeech() {
         />
 
         <Dropdown
-          style={[styles.dropdown, isOutputFocus && { borderColor: "blue" }]}
+          style={[styles.dropdown, isTargetFocus && { borderColor: "blue" }]}
           placeholderStyle={styles.placeholderStyle}
           selectedTextStyle={styles.selectedTextStyle}
           inputSearchStyle={styles.inputSearchStyle}
@@ -208,16 +218,18 @@ export default function SpeechToSpeech() {
           maxHeight={300}
           labelField="label"
           valueField="value"
-          placeholder={!isOutputFocus ? "Select output language" : "..."}
+          placeholder={!isTargetFocus ? "Select output language" : "..."}
           searchPlaceholder="Search..."
-          value={outputValue}
-          onFocus={() => setIsOutputFocus(true)}
-          onBlur={() => setIsOutputFocus(false)}
+          value={targetValue}
+          onFocus={() => setIsTargetFocus(true)}
+          onBlur={() => setIsTargetFocus(false)}
           onChange={(item) => {
-            setOutputValue(item.value);
-            setIsOutputFocus(false);
+            setTargetValue(item.value);
+            setIsTargetFocus(false);
           }}
         />
+        
+        <Text style={{ color: 'red', margin: '5px' }}>{validationError}</Text>
 
         <Text>{message}</Text>
         <View style={styles.buttonView}>
