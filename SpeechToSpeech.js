@@ -26,6 +26,7 @@ export default function SpeechToSpeech() {
   const [message, setMessage] = React.useState("");
   const [audioUrl, setAudioUrl] = React.useState("");
   const [validationError, setValidationError] = React.useState("");
+  const [loading, setLoading] = React.useState("");
 
   /* -------------------------------- Recording ------------------------------- */
   async function startRecording() {
@@ -44,6 +45,7 @@ export default function SpeechToSpeech() {
         mediaRecorder.start();
 
         mediaRecorder.onstop = (e) => {
+          setLoading("Loading...");
           console.log("Creating BLOB...");
           const audioBlob = new Blob(chunks, { type: "audio/webm" });
           setAudioUrl(URL.createObjectURL(audioBlob));
@@ -78,6 +80,7 @@ export default function SpeechToSpeech() {
               //var binaryData = [];
               //binaryData.push(data.body);
               //var data_blob = new Blob(data, {type: "audio/wav"})
+              setLoading("");
               setAudioUrl(URL.createObjectURL(data));
             })
             .catch((error) => {
@@ -239,6 +242,7 @@ export default function SpeechToSpeech() {
           {showDeleteButton()}
         </View>
         <StatusBar style="auto" />
+        <Text style={{ margin: '5px' }}>{loading}</Text>
       </View>
     </View>
   );
