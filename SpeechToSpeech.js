@@ -48,7 +48,7 @@ export default function SpeechToSpeech() {
           setLoading("Loading...");
           console.log("Creating BLOB...");
           const audioBlob = new Blob(chunks, { type: "audio/webm" });
-          setAudioUrl(URL.createObjectURL(audioBlob));
+          //setAudioUrl(URL.createObjectURL(audioBlob));
           //const audio = new Audio(audioUrl);
           //audio.play();
 
