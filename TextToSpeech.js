@@ -47,14 +47,15 @@ async function handleClick(textValue, source, target){
     return;
   }
 
-  translatedText = await fetch('http://localhost:8080/libretranslate?text=' + textValue + '&sourceLanguage=' + source + '&targetLanguage=' + target, {
+  //http://localhost:3000/api/v1/:{parameter["source"]}/:{parameter["target"]}/:{parameter["query"]}
+  translatedText = await fetch('http://localhost:3000/api/v1/'+ source + '/'+ target + '/' + textValue, {
     method: 'GET',
   }).then(response => response.json())
   .then(json => {
     return json;
   });
 
-  return translatedText;
+  return translatedText.translation;
 
 }
 
